@@ -1,0 +1,224 @@
+\documentclass[12pt]{article}
+
+\input{preamble}
+
+\usepackage{minted}
+\usepackage{natbib}
+
+\usepackage{tcolorbox}
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{minted}{\begin{tcolorbox}}%
+\AfterEndEnvironment{minted}{\end{tcolorbox}}%
+
+
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage[shortlabels]{enumitem}
+
+\usepackage{hyperref} % to create a URL link
+\usepackage{tikz}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+
+% ====================================================================
+%   However, the environment can be renewed to support alignment:
+% ====================================================================
+\makeatletter
+\renewcommand*\env@matrix[1][c]{\hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{*\c@MaxMatrixCols #1}}
+\makeatother
+
+
+\begin{document}
+
+\begin{center}
+  \Large \textbf{Penjelasan Algoritma Backpropagation} \\
+  \vspace{0.1in}
+  \normalsize Hendra Bunyamin \\
+  \today
+\end{center}
+
+Lecture notes ini hendak memberikan penjelasan tambahan untuk video \href{https://www.coursera.org/lecture/machine-learning/backpropagation-algorithm-1z9WW}{\textit{Backpropagation Algorithm}} dari MOOC \href{https://www.coursera.org/learn/machine-learning/home/welcome}{\textit{Stanford Machine Learning}} di coursera.org. 
+
+Penjelasan ini akan dimulai dengan \textit{logistic regression} (LR). \textit{Logistic regression} sebenarnya adalah \textit{neural networks} dengan 2 layer, yaitu \textit{input layer} dan \textit{output layer}. 
+
+\section*{Logistic regression}
+Contoh \textit{logistic regression} digambarkan pada Figure~\ref{fig:LR}. Model \textit{logistic regression} pada Figure~\ref{fig:LR} mempunyai 2 \textit{feature}, yaitu $x_1$ dan $x_2$. Ada juga $\theta_1$ (tanda panah yang menghubungkan $x_1$ dan $a^{(2)}_1$), dan $\theta_2$ (tanda panah yang menghubungkan $x_2$ dan $a^{(2)}_1$). Terdapat juga \textit{bias term} ($x_0$) yang tidak tergambar secara eksplisit dan $\theta_0$ (tanda panah yang menghubungkan $x_0$ dan $a^{(2)}_1$).
+
+\def\layersep{2.5cm}
+\begin{figure}[!ht]
+	\centering
+\begin{tikzpicture}[shorten >=1pt,->,draw=black!50, node distance=\layersep]
+    \tikzstyle{every pin edge}=[<-,shorten <=1pt]
+    \tikzstyle{neuron}=[circle,fill=black!25,minimum size=17pt,inner sep=0pt]
+    \tikzstyle{input neuron}=[neuron, fill=green!50];
+    \tikzstyle{output neuron}=[neuron, fill=red!50];
+    \tikzstyle{hidden neuron}=[neuron, fill=blue!50];
+    \tikzstyle{annot} = [text width=4em, text centered]
+
+    % Draw the input layer nodes
+    \foreach \name / \y in {1,...,2}
+    % This is the same as writing \foreach \name / \y in {1/1,2/2,3/3,4/4}
+        \node[input neuron, pin=left:$x_{\y}$] (I-\name) at (0,-\y) {};
+
+    % Draw the output layer node
+    \node[output neuron,pin={[pin edge={->}]right:$h_{\theta}$}, right of=I-1] (O) {};
+	
+    % Connect every node in the input layer with the node in the
+    % output layer.
+    \foreach \source in {1,...,2}
+		\path (I-\source) edge (O);		 	
+\end{tikzpicture}	
+\caption{\textit{Logistic regression} dengan 2 \textit{feature}, yaitu $x_1$ dan $x_2$}
+\label{fig:LR}
+\end{figure}
+
+Model \textit{logistic regression} ($h_\theta$) memiliki bentuk
+\begin{equation}
+	h_\theta(x_1, x_2) = \frac{1}{1+e^{-(\theta_0 + \theta_1 x_1 + \theta_2 x_2)}}
+\end{equation}
+
+atau bentuk \textit{vectorized}-nya adalah
+
+\begin{equation}
+	h_\theta(x) = \frac{1}{1+e^{-\theta^T x}}
+\end{equation}
+
+dengan $\theta = \begin{bmatrix}[r]
+	\theta_0 & \theta_1 & \theta_2
+\end{bmatrix}^T$ dan $x = \begin{bmatrix}[r]
+	1 & x_1 & x_2
+\end{bmatrix}^T$.
+
+\subsection*{Gradient dari Logistic Regression untuk satu training instance}
+Misalkan terdapat satu \textit{training instance}, yaitu $x = \begin{bmatrix}[r]
+	1 & x_1 & x_2
+\end{bmatrix}^T$ dan $y$. Akan dihitung \textit{gradient} dari model \textit{logistic regression} tersebut.
+
+\begin{align}
+	\frac{\partial J(\theta)}{\partial \theta_0} &= (h_\theta(x) - y), \label{eq:gradient-lr-1} \\
+	\frac{\partial J(\theta)}{\partial \theta_1} &= (h_\theta(x) - y) x_1, \text{ dan} \label{eq:gradient-lr-2} \\	
+	\frac{\partial J(\theta)}{\partial \theta_2} &= (h_\theta(x) - y) x_2 \label{eq:gradient-lr-3}	
+\end{align}
+Yang perlu dicatat adalah bahwa untuk \textit{logistic regression} dengan satu \textit{training instance},
+\begin{equation*}
+	\delta^{(2)}_1 = (h_\theta(x) - y).
+\end{equation*}
+$\delta^{(2)}_1$ ini dibaca \textit{delta} dan merupakan \textit{selisih prediksi model dengan nilai sebenarnya}.
+ 
+Dengan menggunakan notasi $\delta^{(2)}_1$, Persamaan~(\ref{eq:gradient-lr-1}), (\ref{eq:gradient-lr-2}), dan (\ref{eq:gradient-lr-3}) dapat ditulis menjadi
+\begin{align}
+	\frac{\partial J(\theta)}{\partial \theta_0} &= \delta^{(2)}_1, \label{eq:gradient-lr-delta-1} \\
+	\frac{\partial J(\theta)}{\partial \theta_1} &= \delta^{(2)}_1 x_1, \text{ dan} \label{eq:gradient-lr-delta-2} \\	
+	\frac{\partial J(\theta)}{\partial \theta_2} &= \delta^{(2)}_1 x_2 \label{eq:gradient-lr-delta-3}	
+\end{align}
+Yang perlu diperhatikan adalah bahwa setiap \textit{neuron} selain \textit{neuron}-\textit{neuron} di \textit{input layer} memiliki delta ($\delta$). Lebih lanjut,
+\begin{equation*}
+	\text{gradient di garis atau bobot} =  \delta \times \text{input di garis atau bobot}.
+\end{equation*}
+
+\subsection*{Gradient dari LR untuk banyak training instance}
+Diketahui $m$ \textit{training instances} dan \textit{label}nya, yaitu 
+\begin{equation*}
+X = \begin{bmatrix}[c]
+	1       & x^{(1)}_1 & x^{(1)}_2 \\
+	1       & x^{(2)}_1 & x^{(2)}_2 \\	
+	\vdots  & \vdots    & \vdots \\
+	1       & x^{(m)}_1 & x^{(m)}_2 \\		 
+\end{bmatrix} \text{ dan } y = \begin{bmatrix}[r]
+	y^{(1)} & y^{(1)} & \cdots & y^{(m)}
+\end{bmatrix}^T	
+\end{equation*} 
+\textit{Gradient} dari model \textit{logistic regression} dengan banyak \textit{training instance} ini adalah
+\begin{align}
+	\frac{\partial J(\theta)}{\partial \theta_0} &= \sum_{i=1}^{m}{(h_\theta(x) - y)}, \label{eq:gradient-lr-multi-1} \\
+	\frac{\partial J(\theta)}{\partial \theta_1} &= \sum_{i=1}^{m}{(h_\theta(x) - y) x_1}, \text{ dan} \label{eq:gradient-lr-multi-2} \\	
+	\frac{\partial J(\theta)}{\partial \theta_2} &= \sum_{i=1}^{m}{(h_\theta(x) - y) x_2} \label{eq:gradient-lr-multi-3}	
+\end{align}
+
+Dengan pemahaman ini, selanjutnya kita akan menghitung gradient dari \textit{neural network}.
+
+\begin{figure}[!ht]
+	\centering
+\begin{tikzpicture}[shorten >=1pt,->,draw=black!50, node distance=\layersep]
+    \tikzstyle{every pin edge}=[<-,shorten <=1pt]
+    \tikzstyle{neuron}=[circle,fill=black!25,minimum size=17pt,inner sep=0pt]
+    \tikzstyle{input neuron}=[neuron, fill=green!50];
+    \tikzstyle{output neuron}=[neuron, fill=red!50];
+    \tikzstyle{hidden neuron}=[neuron, fill=blue!50];
+    \tikzstyle{annot} = [text width=4em, text centered]
+
+    % Draw the input layer nodes
+    \foreach \name / \y in {1,...,2}
+    % This is the same as writing \foreach \name / \y in {1/1,2/2,3/3,4/4}
+        \node[input neuron, pin=left:$x_{\y}$] (I-\name) at (0,-\y) {};
+
+    % Draw the hidden layer nodes
+    \foreach \name / \y in {1,...,2}
+        \path[yshift=0.1cm]
+            node[hidden neuron] (H-\name) at (\layersep,-\y cm) {};
+
+    \foreach \name / \y in {1,...,2}
+        \path[yshift=0.1cm]
+            node[hidden neuron] (J-\name) at (2*\layersep,-\y cm) {};
+
+
+    % Draw the output layer node
+    \node[output neuron,pin={[pin edge={->}]right:$(h_{\Theta})_1$}, right of=J-1] (O) {};
+    \node[output neuron,pin={[pin edge={->}]right:$(h_{\Theta})_2$}, right of=J-2] (1) {};
+	
+    % Connect every node in the input layer with every node in the
+    % hidden layer.
+    \foreach \source in {1,...,2}
+        \foreach \dest in {1,...,2}
+            \path (I-\source) edge (H-\dest);
+            
+    \foreach \source in {1,...,2}
+        \foreach \dest in {1,...,2}
+            \path (H-\source) edge (J-\dest);
+            
+    % Connect every node in the hidden layer with the output layer
+    \foreach \source in {1,...,2}{
+        \path (J-\source) edge (O);
+        \path (J-\source) edge (1);
+	}
+	
+    % Annotate the layers
+    \node[annot,above of=H-1, node distance=1cm] (hl) {Layer 2};
+    \node[annot,above of=O, node distance=1cm] (ol) {Layer 4};    
+    \node[annot,left of=hl] {Layer 1};
+    \node[annot,right of=hl] {Layer 3};
+\end{tikzpicture}	
+\caption{\textit{Artificial neural network} untuk \textbf{Problem 1}}
+\label{fig:ANN-soal-1}
+\end{figure}
+
+
+$\Theta_{11}$
+
+
+What if the knowledge and data we have are not sufficient to completely determine the correct classifier? Then we run the risk of just hallucinating a classifier (or parts of it) that is not grounded in reality, and is simply encoding random quirks in the data. \textit{This problem is called overfitting}, and is \textit{the bugbear of machine learning}.
+When your learner outputs a classifier that is 100\% accurate on the training data but only 50\% accurate on test data, when in fact it could have output one that is 75\% accurate on both, it has overfit.
+
+Everyone in machine learning knows about \textit{overfitting}, but it comes in many forms that are not immediately obvious. One way to understand overfitting is by \textit{decomposing generalization error into bias and variance}.  \textit{Bias is a learner's tendency to consistently learn the same wrong thing}. \textit{Variance is the tendency to learn random things irrespective of the real signal}. Figure~\ref{fig:darts} illustrates this by an analogy with throwing darts at a board. A linear learner has high bias, because when the frontier between two classes is not a hyperplane the learner is unable to induce it~\citep{domingos2012few}.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[scale=.25]{images/darts}
+	\caption{Bias and variance in dart-throwing~\citep{domingos2012few}.}
+	\label{fig:darts}
+\end{figure}
+
+What do we mean by the variance and bias of a statistical learning method? Variance refers to the amount by which $h_\theta$ would change if we estimated it using a different training data set. Since the training data
+are used to fit the statistical learning method, different training data sets will result in a different $h_\theta$. But ideally the estimate for $y$ should not vary too much between training sets. However, if a method has high variance
+then small changes in the training data can result in large changes in $h_\theta$~\citep{james2013introduction}.
+
+On the other hand, bias refers to the error that is introduced by approximating a real-life problem, which may be extremely complicated, by a much simpler model. For example, linear regression assumes that there is a linear
+relationship between $Y$ and $x_1$, $x_2$, $\ldots$, $x_n$. It is unlikely that any real-life problem truly has such a simple linear relationship, and so performing linear regression will undoubtedly result in some bias in the estimate of $y$.
+
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}
