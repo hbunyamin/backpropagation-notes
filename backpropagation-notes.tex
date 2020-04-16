@@ -11,6 +11,10 @@
 \AfterEndEnvironment{minted}{\end{tcolorbox}}%
 
 
+% For writing pseudo-code
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 \usepackage{amsmath,amsthm,amssymb,amsfonts}
 \usepackage[shortlabels]{enumitem}
 
@@ -39,12 +43,12 @@
   \today
 \end{center}
 
-Lecture notes ini hendak memberikan penjelasan tambahan untuk video \href{https://www.coursera.org/lecture/machine-learning/backpropagation-algorithm-1z9WW}{\textit{Backpropagation Algorithm}} dari MOOC \href{https://www.coursera.org/learn/machine-learning/home/welcome}{\textit{Stanford Machine Learning}} di coursera.org. 
+Lecture notes ini hendak memberikan penjelasan tambahan untuk video \textit{Backpropagation Algorithm}~\citep{ng2020backpropalgo} dari Week 5 MOOC {\textit{Stanford Machine Learning}}~\citep{ng2020week5}. 
 
 Penjelasan ini akan dimulai dengan \textit{logistic regression} (LR). \textit{Logistic regression} sebenarnya adalah \textit{neural networks} dengan 2 layer, yaitu \textit{input layer} dan \textit{output layer}. 
 
 \section*{Logistic regression}
-Contoh \textit{logistic regression} digambarkan pada Figure~\ref{fig:LR}. Model \textit{logistic regression} pada Figure~\ref{fig:LR} mempunyai 2 \textit{feature}, yaitu $x_1$ dan $x_2$. Ada juga $\theta_1$ (tanda panah yang menghubungkan $x_1$ dan $a^{(2)}_1$), dan $\theta_2$ (tanda panah yang menghubungkan $x_2$ dan $a^{(2)}_1$). Terdapat juga \textit{bias term} ($x_0$) yang tidak tergambar secara eksplisit dan $\theta_0$ (tanda panah yang menghubungkan $x_0$ dan $a^{(2)}_1$).
+Contoh \textit{logistic regression} digambarkan pada Figure~\ref{fig:LR}. Model \textit{logistic regression} ini mempunyai 2 \textit{features}, yaitu $x_1$ (\textit{neuron} berwarna hijau) dan $x_2$ (\textit{neuron} berwarna hijau). Ada juga $\theta_1$ (tanda panah yang menghubungkan $x_1$ dengan $a^{(2)}_1$ (\textit{neuron} berwarna merah muda)), dan $\theta_2$ (tanda panah yang menghubungkan $x_2$ dan $a^{(2)}_1$). Terdapat juga \textit{bias term} ($x_0$) yang tidak tergambar secara eksplisit dan $\theta_0$ (tanda panah yang menghubungkan $x_0$ dan $a^{(2)}_1$).
 
 \def\layersep{2.5cm}
 \begin{figure}[!ht]
@@ -80,11 +84,9 @@ Model \textit{logistic regression} ($h_\theta$) memiliki bentuk
 \end{equation}
 
 atau bentuk \textit{vectorized}-nya adalah
-
 \begin{equation}
 	h_\theta(x) = \frac{1}{1+e^{-\theta^T x}}
 \end{equation}
-
 dengan $\theta = \begin{bmatrix}[r]
 	\theta_0 & \theta_1 & \theta_2
 \end{bmatrix}^T$ dan $x = \begin{bmatrix}[r]
@@ -94,28 +96,30 @@ dengan $\theta = \begin{bmatrix}[r]
 \subsection*{Gradient dari Logistic Regression untuk satu training instance}
 Misalkan terdapat satu \textit{training instance}, yaitu $x = \begin{bmatrix}[r]
 	1 & x_1 & x_2
-\end{bmatrix}^T$ dan $y$. Akan dihitung \textit{gradient} dari model \textit{logistic regression} tersebut.
-
+\end{bmatrix}^T$ dan $y$. Akan dihitung \textit{gradient} dari model \textit{logistic regression} tersebut. \textit{Gradient} ini sudah dihitung di perkuliahan sebelumnya, yaitu:
 \begin{align}
 	\frac{\partial J(\theta)}{\partial \theta_0} &= (h_\theta(x) - y), \label{eq:gradient-lr-1} \\
 	\frac{\partial J(\theta)}{\partial \theta_1} &= (h_\theta(x) - y) x_1, \text{ dan} \label{eq:gradient-lr-2} \\	
-	\frac{\partial J(\theta)}{\partial \theta_2} &= (h_\theta(x) - y) x_2 \label{eq:gradient-lr-3}	
+	\frac{\partial J(\theta)}{\partial \theta_2} &= (h_\theta(x) - y) x_2. \label{eq:gradient-lr-3}	
 \end{align}
-Yang perlu dicatat adalah bahwa untuk \textit{logistic regression} dengan satu \textit{training instance},
-\begin{equation*}
+Marilah kita mendefinisikan notasi berikut:
+\begin{equation}
 	\delta^{(2)}_1 = (h_\theta(x) - y).
-\end{equation*}
-$\delta^{(2)}_1$ ini dibaca \textit{delta} dan merupakan \textit{selisih prediksi model dengan nilai sebenarnya}.
+	\label{eq:delta-one-instance}
+\end{equation}
+$\delta^{(2)}_1$ ini dibaca \textit{delta} pada $a_1^{(2)}$ dan merupakan \textit{selisih prediksi model dengan nilai sebenarnya}.
  
-Dengan menggunakan notasi $\delta^{(2)}_1$, Persamaan~(\ref{eq:gradient-lr-1}), (\ref{eq:gradient-lr-2}), dan (\ref{eq:gradient-lr-3}) dapat ditulis menjadi
+Dengan menggunakan notasi $\delta^{(2)}_1$ pada Persamaan~(\ref{eq:delta-one-instance}), Persamaan~(\ref{eq:gradient-lr-1}), (\ref{eq:gradient-lr-2}), dan (\ref{eq:gradient-lr-3}) dapat ditulis menjadi
 \begin{align}
 	\frac{\partial J(\theta)}{\partial \theta_0} &= \delta^{(2)}_1, \label{eq:gradient-lr-delta-1} \\
 	\frac{\partial J(\theta)}{\partial \theta_1} &= \delta^{(2)}_1 x_1, \text{ dan} \label{eq:gradient-lr-delta-2} \\	
-	\frac{\partial J(\theta)}{\partial \theta_2} &= \delta^{(2)}_1 x_2 \label{eq:gradient-lr-delta-3}	
+	\frac{\partial J(\theta)}{\partial \theta_2} &= \delta^{(2)}_1 x_2. \label{eq:gradient-lr-delta-3}	
 \end{align}
-Yang perlu diperhatikan adalah bahwa setiap \textit{neuron} selain \textit{neuron}-\textit{neuron} di \textit{input layer} memiliki delta ($\delta$). Lebih lanjut,
+OK, yang perlu diperhatikan adalah bahwa \textbf{setiap \textit{neuron} selain \textit{neuron}-\textit{neuron} di \textit{input layer} memiliki delta} ($\bm{\delta}$). Lebih lanjut,
 \begin{equation*}
-	\text{gradient di garis atau bobot} =  \delta \times \text{input di garis atau bobot}.
+	\boxed{
+	\text{gradient} =  \delta \times \text{input}.
+	}
 \end{equation*}
 
 \subsection*{Gradient dari LR untuk banyak training instance}
@@ -130,15 +134,59 @@ X = \begin{bmatrix}[c]
 	y^{(1)} & y^{(1)} & \cdots & y^{(m)}
 \end{bmatrix}^T	
 \end{equation*} 
-\textit{Gradient} dari model \textit{logistic regression} dengan banyak \textit{training instance} ini adalah
+Seperti yang dibahas di perkuliahan sebelumnya, \textit{gradient} dari model \textit{logistic regression} dengan banyak \textit{training instance} ini adalah
 \begin{align}
-	\frac{\partial J(\theta)}{\partial \theta_0} &= \sum_{i=1}^{m}{(h_\theta(x) - y)}, \label{eq:gradient-lr-multi-1} \\
-	\frac{\partial J(\theta)}{\partial \theta_1} &= \sum_{i=1}^{m}{(h_\theta(x) - y) x_1}, \text{ dan} \label{eq:gradient-lr-multi-2} \\	
-	\frac{\partial J(\theta)}{\partial \theta_2} &= \sum_{i=1}^{m}{(h_\theta(x) - y) x_2} \label{eq:gradient-lr-multi-3}	
+	\frac{\partial J(\theta)}{\partial \theta_0} &= \frac{1}{m} \sum_{i=1}^{m}{(h_\theta(x^{(i)}) - y^{(i)})}, \label{eq:gradient-lr-multi-1} \\
+	\frac{\partial J(\theta)}{\partial \theta_1} &= \frac{1}{m} \sum_{i=1}^{m}{(h_\theta(x^{(i)}) - y^{(i)}) x_1^{(i)}}, \text{ dan} \label{eq:gradient-lr-multi-2} \\	
+	\frac{\partial J(\theta)}{\partial \theta_2} &= \frac{1}{m} \sum_{i=1}^{m}{(h_\theta(x^{(i)}) - y^{(i)}) x_2^{(i)}}. \label{eq:gradient-lr-multi-3}	
 \end{align}
 
+Lebih lanjut lagi, kita perkenalkan notasi berikut:
+\begin{equation}
+	\delta_1^{(2)(i)} = (h_\theta(x^{(i)}) - y^{(i)}).
+	\label{eq:delta-multi-variable}	
+\end{equation}
+$\delta_1^{(2)(i)}$ adalah \textit{selisih prediksi model dengan nilai sebenarnya} untuk \textit{instance} ke-$i$, mirip dengan notasi delta di Persamaan~(\ref{eq:delta-one-instance}). 
+
+Dengan menggunakan notasi $\delta_1^{(2)(i)}$ di Persamaan~(\ref{eq:delta-multi-variable}), Persamaan~(\ref{eq:gradient-lr-multi-1}), (\ref{eq:gradient-lr-multi-2}), dan (\ref{eq:gradient-lr-multi-3}) menjadi
+
+\begin{align}
+	\frac{\partial J(\theta)}{\partial \theta_0} &= \frac{1}{m} \sum_{i=1}^{m}{\delta_1^{(2)(i)}}, \label{eq:gradient-lr-multi-1a} \\
+	\frac{\partial J(\theta)}{\partial \theta_1} &= \frac{1}{m} \sum_{i=1}^{m}{\delta_1^{(2)(i)} x_1^{(i)}}, \text{ dan} \label{eq:gradient-lr-multi-2a} \\	
+	\frac{\partial J(\theta)}{\partial \theta_2} &= \frac{1}{m} \sum_{i=1}^{m}{\delta_1^{(2)(i)} x_2^{(i)}}. \label{eq:gradient-lr-multi-3a}	
+\end{align}
+
+Kembali kita menggunakan notasi baru yaitu 
+
+\begin{equation}
+\Delta_{kj}^{(l)} = \sum_{i=1}^{m}{\delta_k^{(l+1)(i)} x_j^{(i)}} 
+\label{eq:persamaan-Delta}
+\end{equation}
+dengan
+\begin{equation*}
+\begin{array}{rcl}
+	\Delta_{kj}^{(l)} & = & \text{Total penjumlahan }\delta_k^{(l+1)(i)} x_j^{(i)} \text{ untuk instance ke-}i=1, \ldots, m
+\end{array}	
+\end{equation*} 
+sehingga Persamaan~(\ref{eq:gradient-lr-multi-1a}), (\ref{eq:gradient-lr-multi-2a}), (\ref{eq:gradient-lr-multi-3a}) menjadi 
+
+\begin{align}
+	\frac{\partial J(\theta)}{\partial \theta_0} &= \frac{1}{m} \Delta_{10}^{(1)}, \label{eq:gradient-lr-multi-1b} \\
+	\frac{\partial J(\theta)}{\partial \theta_1} &= \frac{1}{m} \Delta_{11}^{(1)}, \text{ dan} \label{eq:gradient-lr-multi-2b} \\	
+	\frac{\partial J(\theta)}{\partial \theta_2} &= \frac{1}{m} \Delta_{12}^{(1)}
+	 \label{eq:gradient-lr-multi-3b}	
+\end{align}
+
+Dengan definisi baru ini, algoritma \textit{gradient descent} menjadi 
+\begin{align}
+	\theta_0 &= \theta_0 - \alpha \times \frac{1}{m} \Delta_{10}^{(1)}, \label{eq:gradient-descent-with-Delta-1} \\
+	\theta_1 &= \theta_1 - \alpha \times \frac{1}{m} \Delta_{11}^{(1)}, \text{ dan} \label{eq:gradient-descent-with-Delta-2} \\	
+	\theta_2 &= \theta_2 - \alpha \times \frac{1}{m} \Delta_{12}^{(1)}
+	 \label{eq:gradient-descent-with-Delta-3}	
+\end{align}
 Dengan pemahaman ini, selanjutnya kita akan menghitung gradient dari \textit{neural network}.
 
+\section*{Artificial Neural Network (ANN)}
 \begin{figure}[!ht]
 	\centering
 \begin{tikzpicture}[shorten >=1pt,->,draw=black!50, node distance=\layersep]
@@ -190,33 +238,242 @@ Dengan pemahaman ini, selanjutnya kita akan menghitung gradient dari \textit{neu
     \node[annot,left of=hl] {Layer 1};
     \node[annot,right of=hl] {Layer 3};
 \end{tikzpicture}	
-\caption{\textit{Artificial neural network} untuk \textbf{Problem 1}}
+\caption{\textit{Artificial neural network} dengan 2 \textit{hidden layer}}
 \label{fig:ANN-soal-1}
 \end{figure}
 
+Figure~\ref{fig:ANN-soal-1} menggambarkan ANN dengan 2 \textit{hidden layer} dan Algorithm~\ref{alg:detil-backpropagation} menjelaskan detil dari algoritma \textit{backpropagation} yang dijelaskan di video.
+	\begin{algorithm}[!ht]
+		\caption{Detil algoritma \textit{Backpropagation} dari Video Andrew Ng}
+		\label{alg:detil-backpropagation}
+		\begin{algorithmic}[1] 
+			\Procedure{Algoritma-Backpropagation}{}\newline
+			\Comment Our Training Set: $\{ (x^{(1)}, y^{(1)}), (x^{(2)}, y^{(2)}), \ldots, (x^{(m)}, y^{(m)}) \}$
+			\State Set $\Delta_{ij}^{(l)} = 0$ (for all $l$, $i$, $j$)
+			\For{$i = 1$ to $m$}
+			\State Set $a^{(1)} = x^{(i)}$
+			\State Perform forward propagation to compute $a^{(l)}$ for $l=2, 3, \ldots, L$
+			\State Using $y^{(i)}$, compute $\delta^{(L)} = a^{(L)} - y^{(i)}$
+			\State Compute $\delta^{(L-1)}, \delta^{(L-2)}, \ldots, \delta^{(2)}$
+			\State $\Delta^{(l)}_{ij} := \Delta^{(l)}_{ij} + a_j^{(l)} \delta_i^{(l+1)} $
+			\EndFor 
+			\State $D_{ij}^{(l)}$ := $\frac{1}{m} \Delta^{(l)}_{ij} + \lambda \Theta_{ij}^{(l)}$ if $j \neq 0$
+			\State $D_{ij}^{(l)}$ := $\frac{1}{m} \Delta^{(l)}_{ij}$ if $j = 0$ \newline
+			\Comment Catatan: $\frac{\partial J(\Theta)}{\partial \Theta_{ij}^{(l)}} = D_{ij}^{(l)}$
+			\EndProcedure
+		\end{algorithmic}
+	\end{algorithm}	
 
-$\Theta_{11}$
+Marilah kita mulai membahas proses di dalam algoritma \textit{backpropagation} pada Figure~\ref{fig:ANN-soal-1}. Setelah \textit{forward propagation} dilakukan, nilai-nilai dari $a_1^{(2)}$, $a_2^{(2)}$, $a_1^{(3)}$, $a_2^{(3)}$, $a_1^{(4)}$, dan $a_2^{(4)}$ diketahui. Algoritma \textit{backpropagation} dimulai dari layer terakhir, dalam hal ini adalah layer 4. Di layer 4 dapat dihitung
+\begin{align}
+	\delta_1^{(4)} &= ((h_{\Theta}(x))_1 - y_1) \label{eq:delta-1-layer-4} \\
+	\delta_2^{(4)} &= ((h_{\Theta}(x))_2 - y_2)	 \label{eq:delta-2-layer-4}
+\end{align}
+Persamaan~(\ref{eq:delta-1-layer-4}) dan Persamaan~(\ref{eq:delta-2-layer-4}) dapat dijadikan bentuk \textit{vectorized} menjadi
+\begin{equation}
+	\delta^{(4)} = \begin{bmatrix}[r]
+		(h_\Theta(x))_1 - y_1 \\
+		(h_\Theta(x))_2 - y_2
+	\end{bmatrix}
+\end{equation}
 
+Selanjutnya di layer 3 dapat dihitung
+\begin{align}
+	\delta_0^{(3)} &= (\Theta_{10}^{(3)} \delta_1^{(4)} + \Theta_{20}^{(3)} \delta_2^{(4)}) a_0^{(3)} \times (1-a_0^{(3)}) \label{eq:delta-0-layer-3} \\
+	\delta_1^{(3)} &= (\Theta_{11}^{(3)} \delta_1^{(4)} + \Theta_{21}^{(3)} \delta_2^{(4)}) a_1^{(3)} \times (1-a_1^{(3)}) \label{eq:delta-1-layer-3} \\
+	\delta_2^{(3)} &= (\Theta_{12}^{(3)} \delta_1^{(4)} + \Theta_{22}^{(3)} \delta_2^{(4)}) a_2^{(3)} \times (1-a_2^{(3)})	\label{eq:delta-2-layer-3}
+\end{align}
 
-What if the knowledge and data we have are not sufficient to completely determine the correct classifier? Then we run the risk of just hallucinating a classifier (or parts of it) that is not grounded in reality, and is simply encoding random quirks in the data. \textit{This problem is called overfitting}, and is \textit{the bugbear of machine learning}.
-When your learner outputs a classifier that is 100\% accurate on the training data but only 50\% accurate on test data, when in fact it could have output one that is 75\% accurate on both, it has overfit.
+Persamaan~(\ref{eq:delta-0-layer-3}), (\ref{eq:delta-1-layer-3}), dan (\ref{eq:delta-2-layer-3}) dapat dijadikan vektor menjadi
+\begin{equation}
+	\underbrace{\begin{bmatrix}[c]
+		\delta_0^{(3)} \\
+		\delta_1^{(3)} \\
+		\delta_2^{(3)}
+	\end{bmatrix}}_{\delta^{(3)}}  = \underbrace{\begin{bmatrix}[c]
+		\Theta_{10}^{(3)} & \Theta_{20}^{(3)} \\		
+		\Theta_{11}^{(3)} & \Theta_{21}^{(3)} \\
+		\Theta_{12}^{(3)} & \Theta_{22}^{(3)}
+	\end{bmatrix}}_{(\Theta^{(3)})^T}  \underbrace{\begin{bmatrix}[c]
+		\delta_1^{(4)} \\
+		\delta_2^{(4)}
+	\end{bmatrix}}_{\delta^{(4)}}  .* \underbrace{\begin{bmatrix}[c]
+		a_0^{(3)} \\		
+		a_1^{(3)} \\
+		a_2^{(3)}
+	\end{bmatrix}}_{a^{(3)}}  .* \underbrace{\begin{bmatrix}[c]
+		1-a_0^{(3)} \\
+		1-a_1^{(3)} \\
+		1-a_2^{(3)}
+	\end{bmatrix}}_{1-a^{(3)}}.
+\end{equation}
+Kemudian elemen $\delta_0^{(3)}$ pada $\delta^{(3)}$ kita buang karena $\delta_0^{(3)}$ adalah error atau selisih pada \textit{bias} $a_0^{(3)}$ yang bukan neuron sebenarnya. Oleh karena itu, 
+\begin{equation}
+	\delta^{(3)} = \begin{bmatrix}[c]
+		\delta_1^{(3)} \\
+		\delta_2^{(3)} \\		
+	\end{bmatrix}
+\end{equation}
 
-Everyone in machine learning knows about \textit{overfitting}, but it comes in many forms that are not immediately obvious. One way to understand overfitting is by \textit{decomposing generalization error into bias and variance}.  \textit{Bias is a learner's tendency to consistently learn the same wrong thing}. \textit{Variance is the tendency to learn random things irrespective of the real signal}. Figure~\ref{fig:darts} illustrates this by an analogy with throwing darts at a board. A linear learner has high bias, because when the frontier between two classes is not a hyperplane the learner is unable to induce it~\citep{domingos2012few}.
+Selanjutnya, di layer 2 dapat dihitung
+\begin{align}
+	\delta_0^{(2)} &= (\Theta_{10}^{(2)} \delta_1^{(3)} + \Theta_{20}^{(2)} \delta_2^{(3)}) a_0^{(2)} \times (1-a_0^{(2)}) \label{eq:delta-0-layer-2} \\
+	\delta_1^{(2)} &= (\Theta_{11}^{(2)} \delta_1^{(3)} + \Theta_{21}^{(2)} \delta_2^{(3)}) a_1^{(2)} \times (1-a_1^{(2)}) \label{eq:delta-1-layer-2} \\
+	\delta_2^{(2)} &= (\Theta_{12}^{(2)} \delta_1^{(3)} + \Theta_{22}^{(2)} \delta_2^{(3)}) a_2^{(2)} \times (1-a_2^{(2)})	\label{eq:delta-2-layer-2}
+\end{align}
 
-\begin{figure}[!ht]
-	\centering
-	\includegraphics[scale=.25]{images/darts}
-	\caption{Bias and variance in dart-throwing~\citep{domingos2012few}.}
-	\label{fig:darts}
-\end{figure}
+Persamaan~(\ref{eq:delta-0-layer-2}), (\ref{eq:delta-1-layer-2}), dan (\ref{eq:delta-2-layer-2}) dapat dijadikan vektor menjadi
+\begin{equation}
+	\underbrace{\begin{bmatrix}[c]
+		\delta_0^{(2)} \\
+		\delta_1^{(2)} \\
+		\delta_2^{(2)}
+	\end{bmatrix}}_{\delta^{(2)}}  = \underbrace{\begin{bmatrix}[c]
+		\Theta_{10}^{(2)} & \Theta_{20}^{(2)} \\		
+		\Theta_{11}^{(2)} & \Theta_{21}^{(2)} \\
+		\Theta_{12}^{(2)} & \Theta_{22}^{(2)}
+	\end{bmatrix}}_{(\Theta^{(2)})^T}  \underbrace{\begin{bmatrix}[c]
+		\delta_1^{(3)} \\
+		\delta_2^{(3)}
+	\end{bmatrix}}_{\delta^{(3)}}  .* \underbrace{\begin{bmatrix}[c]
+		a_0^{(2)} \\		
+		a_1^{(2)} \\
+		a_2^{(2)}
+	\end{bmatrix}}_{a^{(2)}}  .* \underbrace{\begin{bmatrix}[c]
+		1-a_0^{(2)} \\
+		1-a_1^{(2)} \\
+		1-a_2^{(2)}
+	\end{bmatrix}}_{1-a^{(2)}}.
+\end{equation}
+Kembali elemen $\delta_0^{(2)}$ pada $\delta^{(2)}$ kita buang karena $\delta_0^{(2)}$ adalah error atau selisih pada \textit{bias} $a_0^{(2)}$ yang bukan neuron sebenarnya.
 
-What do we mean by the variance and bias of a statistical learning method? Variance refers to the amount by which $h_\theta$ would change if we estimated it using a different training data set. Since the training data
-are used to fit the statistical learning method, different training data sets will result in a different $h_\theta$. But ideally the estimate for $y$ should not vary too much between training sets. However, if a method has high variance
-then small changes in the training data can result in large changes in $h_\theta$~\citep{james2013introduction}.
+Selanjutnya, kita definisikan 
+\begin{equation}
+	\Delta^{(3)} = \begin{bmatrix}[c]
+		\Delta_{10}^{(3)} & \Delta_{11}^{(3)} & \Delta_{12}^{(3)} \\
+		\Delta_{20}^{(3)} & \Delta_{21}^{(3)} & \Delta_{22}^{(3)}		
+	\end{bmatrix} = \begin{bmatrix}[c]
+		0 & 0 & 0 \\
+		0 & 0 & 0		
+	\end{bmatrix}
+\end{equation}
+Kemudian untuk setiap \textit{train instance} dari $i = 1, 2, \ldots, m$, $\Delta^{(3)}$ akan mengakumulasi gradient ($\delta \times \text{input}$) dari setiap \textit{train instance}  sebagai berikut:
+\begin{align}
+\underbrace{\begin{bmatrix}[c]
+		\Delta_{10}^{(3)} & \Delta_{11}^{(3)} & \Delta_{12}^{(3)} \\
+		\Delta_{20}^{(3)} & \Delta_{21}^{(3)} & \Delta_{22}^{(3)}		
+	\end{bmatrix}}_{\Delta^{(3)}} &= \begin{bmatrix}[c]
+		\Delta_{10}^{(3)} & \Delta_{11}^{(3)} & \Delta_{12}^{(3)} \\
+		\Delta_{20}^{(3)} & \Delta_{21}^{(3)} & \Delta_{22}^{(3)}		
+	\end{bmatrix} + \begin{bmatrix}[c]
+		\delta_1^{(4)} & \delta_1^{(4)} a_1^{(3)} & \delta_1^{(4)} a_2^{(3)} \\
+		\delta_2^{(4)} & \delta_2^{(4)} a_1^{(3)} & \delta_2^{(4)} a_2^{(3)}
+	\end{bmatrix}	\\
+	              &= \underbrace{\begin{bmatrix}[c]
+		\Delta_{10}^{(3)} & \Delta_{11}^{(3)} & \Delta_{12}^{(3)} \\
+		\Delta_{20}^{(3)} & \Delta_{21}^{(3)} & \Delta_{22}^{(3)}		
+	\end{bmatrix}}_{\Delta^{(3)}} + \underbrace{\begin{bmatrix}[c]
+		\delta_1^{(4)} \\
+		\delta_2^{(4)}
+	\end{bmatrix}}_{\delta^{(4)}}  \underbrace{\begin{bmatrix}[c]
+		1 & a_1^{(3)} & a_2^{(3)}
+	\end{bmatrix}}_{(a^{(3)})^T} 
+\end{align}
+Kembali, kita definisikan 
+\begin{equation}
+	\Delta^{(2)} = \begin{bmatrix}[c]
+		\Delta_{10}^{(2)} & \Delta_{11}^{(2)} & \Delta_{12}^{(2)} \\
+		\Delta_{20}^{(2)} & \Delta_{21}^{(2)} & \Delta_{22}^{(2)}		
+	\end{bmatrix} = \begin{bmatrix}[c]
+		0 & 0 & 0 \\
+		0 & 0 & 0		
+	\end{bmatrix}
+\end{equation}
+Kemudian kembali untuk setiap \textit{train instance} dari $i = 1, 2, \ldots, m$, $\Delta^{(2)}$ akan mengakumulasi gradient ($\delta \times \text{input}$) dari setiap \textit{train instance}  sebagai berikut:
+\begin{align}
+\underbrace{\begin{bmatrix}[c]
+		\Delta_{10}^{(2)} & \Delta_{11}^{(2)} & \Delta_{12}^{(2)} \\
+		\Delta_{20}^{(2)} & \Delta_{21}^{(2)} & \Delta_{22}^{(2)}		
+	\end{bmatrix}}_{\Delta^{(2)}} &= \begin{bmatrix}[c]
+		\Delta_{10}^{(2)} & \Delta_{11}^{(2)} & \Delta_{12}^{(2)} \\
+		\Delta_{20}^{(2)} & \Delta_{21}^{(2)} & \Delta_{22}^{(2)}		
+	\end{bmatrix} + \begin{bmatrix}[c]
+		\delta_1^{(3)} & \delta_1^{(3)} a_1^{(2)} & \delta_1^{(3)} a_2^{(2)} \\
+		\delta_2^{(3)} & \delta_2^{(3)} a_1^{(2)} & \delta_2^{(3)} a_2^{(2)}
+	\end{bmatrix}	\\
+	              &= \underbrace{\begin{bmatrix}[c]
+		\Delta_{10}^{(2)} & \Delta_{11}^{(2)} & \Delta_{12}^{(2)} \\
+		\Delta_{20}^{(2)} & \Delta_{21}^{(2)} & \Delta_{22}^{(2)}		
+	\end{bmatrix}}_{\Delta^{(2)}} + \underbrace{\begin{bmatrix}[c]
+		\delta_1^{(3)} \\
+		\delta_2^{(3)}
+	\end{bmatrix}}_{\delta^{(3)}}  \underbrace{\begin{bmatrix}[c]
+		1 & a_1^{(2)} & a_2^{(2)}
+	\end{bmatrix}}_{(a^{(2)})^T} 
+\end{align}
+Kembali, kita definisikan 
+\begin{equation}
+	\Delta^{(1)} = \begin{bmatrix}[c]
+		\Delta_{10}^{(1)} & \Delta_{11}^{(1)} & \Delta_{12}^{(1)} \\
+		\Delta_{20}^{(1)} & \Delta_{21}^{(1)} & \Delta_{22}^{(1)}		
+	\end{bmatrix} = \begin{bmatrix}[c]
+		0 & 0 & 0 \\
+		0 & 0 & 0		
+	\end{bmatrix}
+\end{equation}
+Kemudian kembali untuk setiap \textit{train instance} dari $i = 1, 2, \ldots, m$, $\Delta^{(1)}$ akan mengakumulasi gradient ($\delta \times \text{input}$) dari setiap \textit{train instance}  sebagai berikut:
+\begin{align}
+\underbrace{\begin{bmatrix}[c]
+		\Delta_{10}^{(1)} & \Delta_{11}^{(1)} & \Delta_{12}^{(1)} \\
+		\Delta_{20}^{(1)} & \Delta_{21}^{(1)} & \Delta_{22}^{(1)}		
+	\end{bmatrix}}_{\Delta^{(1)}} &= \begin{bmatrix}[c]
+		\Delta_{10}^{(1)} & \Delta_{11}^{(1)} & \Delta_{12}^{(1)} \\
+		\Delta_{20}^{(1)} & \Delta_{21}^{(1)} & \Delta_{22}^{(1)}		
+	\end{bmatrix} + \begin{bmatrix}[c]
+		\delta_1^{(2)} & \delta_1^{(2)} a_1^{(1)} & \delta_1^{(2)} a_2^{(1)} \\
+		\delta_2^{(2)} & \delta_2^{(2)} a_1^{(1)} & \delta_2^{(2)} a_2^{(1)}
+	\end{bmatrix}	\\
+	              &= \underbrace{\begin{bmatrix}[c]
+		\Delta_{10}^{(1)} & \Delta_{11}^{(1)} & \Delta_{12}^{(1)} \\
+		\Delta_{20}^{(1)} & \Delta_{21}^{(1)} & \Delta_{22}^{(1)}		
+	\end{bmatrix}}_{\Delta^{(1)}} + \underbrace{\begin{bmatrix}[c]
+		\delta_1^{(2)} \\
+		\delta_2^{(2)}
+	\end{bmatrix}}_{\delta^{(2)}}  \underbrace{\begin{bmatrix}[c]
+		1 & a_1^{(1)} & a_2^{(1)}
+	\end{bmatrix}}_{(a^{(1)})^T} \\
+	              &= \underbrace{\begin{bmatrix}[c]
+		\Delta_{10}^{(1)} & \Delta_{11}^{(1)} & \Delta_{12}^{(1)} \\
+		\Delta_{20}^{(1)} & \Delta_{21}^{(1)} & \Delta_{22}^{(1)}		
+	\end{bmatrix}}_{\Delta^{(1)}} + \underbrace{\begin{bmatrix}[c]
+		\delta_1^{(2)} \\
+		\delta_2^{(2)}
+	\end{bmatrix}}_{\delta^{(2)}}  \underbrace{\begin{bmatrix}[c]
+		1 & x_1 & x_2
+	\end{bmatrix}}_{x^T}	 
+\end{align}
 
-On the other hand, bias refers to the error that is introduced by approximating a real-life problem, which may be extremely complicated, by a much simpler model. For example, linear regression assumes that there is a linear
-relationship between $Y$ and $x_1$, $x_2$, $\ldots$, $x_n$. It is unlikely that any real-life problem truly has such a simple linear relationship, and so performing linear regression will undoubtedly result in some bias in the estimate of $y$.
-
+Setelah $\Delta^{(1)}$, $\Delta^{(2)}$, dan $\Delta^{(3)}$ diakumulasi untuk $i = 1, 2, \ldots, m$, saatnya kita menghitung gradient untuk $\Theta^{(1)}$, $\Theta^{(2)}$, dan $\Theta^{(3)}$.
+\begin{align}
+	D^{(1)} &= \begin{bmatrix}[c]
+		\frac{1}{m} \Delta_{10}^{(1)} & \frac{1}{m} \Delta_{11}^{(1)} + \frac{\lambda}{m}  \Theta_{11}^{(1)} & \frac{1}{m} \Delta_{12}^{(1)} + \frac{\lambda}{m} \Theta_{12}^{(1)} \\
+		\frac{1}{m} \Delta_{20}^{(1)} & \frac{1}{m} \Delta_{21}^{(1)} + \frac{\lambda}{m} \Theta_{21}^{(1)} & \frac{1}{m} \Delta_{22}^{(1)} + \frac{\lambda}{m} \Theta_{22}^{(1)}		
+	\end{bmatrix} \\
+	D^{(2)} &= \begin{bmatrix}[c]
+		\frac{1}{m} \Delta_{10}^{(2)} & \frac{1}{m} \Delta_{11}^{(2)} + \frac{\lambda}{m} \Theta_{11}^{(2)} & \frac{1}{m} \Delta_{12}^{(2)} + \frac{\lambda}{m} \Theta_{12}^{(2)} \\
+		\frac{1}{m} \Delta_{20}^{(2)} & \frac{1}{m} \Delta_{21}^{(2)} + \frac{\lambda}{m} \Theta_{21}^{(2)} & \frac{1}{m} \Delta_{22}^{(2)} + \frac{\lambda}{m} \Theta_{22}^{(2)} 
+	\end{bmatrix} \\
+	D^{(3)} &= \begin{bmatrix}[c]
+		\frac{1}{m} \Delta_{10}^{(3)} & \frac{1}{m} \Delta_{11}^{(3)} + \frac{\lambda}{m} \Theta_{11}^{(3)} & \frac{1}{m} \Delta_{12}^{(3)} + \frac{\lambda}{m} \Theta_{12}^{(3)} \\
+		\frac{1}{m} \Delta_{20}^{(3)} & \frac{1}{m} \Delta_{21}^{(3)} + \frac{\lambda}{m} \Theta_{21}^{(3)} & \frac{1}{m} \Delta_{22}^{(3)} + \frac{\lambda}{m} \Theta_{22}^{(3)} 
+	\end{bmatrix}	
+\end{align}
+Terakhir, kita akan update $\Theta^{(1)}$, $\Theta^{(2)}$, dan $\Theta^{(3)}$ seperti berikut:
+\begin{align}
+	\Theta^{(1)} &= \Theta^{(1)} - \alpha \times D^{(1)} \\
+	\Theta^{(2)} &= \Theta^{(2)} - \alpha \times D^{(2)} \\
+	\Theta^{(3)} &= \Theta^{(3)} - \alpha \times D^{(3)}	
+\end{align}
 
 \bibliographystyle{apalike}
 \bibliography{references}

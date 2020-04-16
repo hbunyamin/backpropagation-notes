@@ -1,0 +1,16 @@
+\begin{thebibliography}{}
+
+\bibitem[{Stanford ML}, 2020a]{ng2020backpropalgo}
+{Stanford ML} (2020a).
+\newblock Backpropagation algorithm.
+\newblock
+  \url{https://www.coursera.org/learn/machine-learning/supplement/pjdBA/backpropagation-algorithm}.
+\newblock Accessed: 2020-04-09.
+
+\bibitem[{Stanford ML}, 2020b]{ng2020week5}
+{Stanford ML} (2020b).
+\newblock Neural networks: Learning.
+\newblock \url{https://www.coursera.org/learn/machine-learning/home/week/5}.
+\newblock Accessed: 2020-04-09.
+
+\end{thebibliography}
